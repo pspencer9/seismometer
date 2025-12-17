@@ -18,7 +18,7 @@ PathLike = Union[str, Path]
 COUNTS = ["TP", "FP", "TN", "FN"]
 PERCENTS = [f"{count} (%)" for count in COUNTS]
 RATE_METRICS = ["Flag Rate"]
-PERFORMANCE = ["Accuracy", "Sensitivity", "Specificity", "PPV", "NPV", "F1", "F0.5", "F2"]
+PERFORMANCE = ["Accuracy", "Sensitivity", "Specificity", "PPV", "NPV", "F1", "F0.5", "F2", "FM"]
 WORKFLOW_METRICS = ["LR+", "NetBenefitScore", "NNE"]
 THRESHOLD = "Threshold"
 MONOTONIC_METRICS = ["Sensitivity", "Specificity", "Flag Rate"]
@@ -340,8 +340,12 @@ def calculate_bin_stats(
         f_0_5 = f_beta(tps, fns, fps, 0.5)
         f2 = f_beta(tps, fns, fps, 2)
 
+        # TP / TP + FP
         ppv = tps / (tps + fps)
         ppv[np.isnan(ppv)] = 1
+
+        # Fowlkes-Mallow index: Square root of (PPV * TPR)
+        fm = (ppv * tpr) ** 0.5
 
         # TN / TN + FN
         npv = np.divide(tns, tns + fns)
@@ -375,6 +379,7 @@ def calculate_bin_stats(
                 f1,
                 f_0_5,
                 f2,
+                fm,
                 # WORKFLOWS
                 lr,
                 nbs,
